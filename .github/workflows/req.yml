@@ -1,0 +1,17 @@
+name: Integration Test
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Self test
+        id: selftest
+
+        uses: timmypidashev/auto-pipreqs-cpy@master
+
+        # Put an example of mandatory inputs here
+        with:
+          IGNORE_PATH: subodules #default is none, i added because i needed it at one point :)
+          PROJECT_PATH: project_folder   #default is the root of the repository
+          REQUIREMENT_PATH: project_folder/requirements.txt  #default is requirement.txt in the root of your repository 

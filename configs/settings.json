@@ -12,7 +12,7 @@
         "schedules": "https://proclubsnation.com/wp-json/sportspress/v2/calendars?slug={}"
       },
       "debug": {
-        "debug_set": true,
+        "debug_set": false,
         "pcn": {
           "player_role": 449043802829750272,
           "waiting_verification_role": 1001999651429425233,

@@ -1,3 +1,4 @@
+# Table maker helper function
 from typing import Any, Optional, Union
 
 def league_tables(standings):

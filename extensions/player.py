@@ -23,7 +23,7 @@ class UserRegistration(Document):
         name = "discord_registered"
 
 # 442081251441115136
-
+# Player stats
 class PlayerStats(Extension):
     logger = logging.getLogger(logger_name)
     @slash_command(

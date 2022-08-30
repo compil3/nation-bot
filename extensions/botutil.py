@@ -63,6 +63,7 @@ def get_size(bytes, suffix="B"):
         bytes /= factor
 
 
+#Bot Information and Utility Functions
 class BotInfo (Extension):
     def UpdateEmbed(self, title: str) -> Embed:
         e = Embed(

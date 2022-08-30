@@ -30,6 +30,7 @@ class VerificationQueue(Document):
     class Collection:
         name = "verification_queue"
 
+#Discord auto-verification
 class DiscordVerification(Extension):
     logger = logging.getLogger(logger_name)
     @prefixed_command()

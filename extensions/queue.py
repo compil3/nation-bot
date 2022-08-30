@@ -36,15 +36,7 @@ class VerificationQueue(Document):
     class Collection:
         name = "verification_queue"
 
-# PCN Roles
-# Admin - 552702041395298324
-# Roster Admin - 543563725630865417
-# player admin - 442082962826199041
-# Moderator - 608012366197686286
-# Owner - 442082486022045697
-# Discord Management - 545392640884211712
-
-
+#Verification queue system
 class Queue(Extension):
     bot: "Bot"
 

@@ -22,7 +22,7 @@ class Registered(Document):
     class Collection:
         name = "discord_registered"
 
-
+# used to look up a discord member's gamer tag and return if they exist on pcn.
 class PlayerFinder(Extension):
 
 

@@ -22,6 +22,7 @@ from config import ConfigLoader
 # logger.add("./logs/main.log", format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO", rotation="5MB", retention="5 days", compression="zip")
 dev = False
 
+#The start of the bot.
 class Bot(Client):
     logger = logging.getLogger(logger_name)
     def __init__(self, current_dir, config):

@@ -1,11 +1,11 @@
 import asyncio
+import logging
 from datetime import datetime
 from typing import Dict, Optional
 
 from beanie import Document, Indexed
-from loguru import logger
 from naff import (BrandColors, Embed, Guild, Modal, ModalContext,
-                  ParagraphText, ShortText, Timestamp)
+                  ParagraphText, ShortText, Timestamp, logger_name)
 from naff.api.http.http_requests.members import MemberRequests
 from naff.client.utils import misc_utils, optional
 from naff.models import (AutocompleteContext, Extension, InteractionContext,
@@ -42,7 +42,7 @@ class TagStorage(Document):
 
 
 class Tags(Extension):
-
+    logger = logging.getLogger(logger_name)
     def __init__(self, bot):
         self.tags = {}
         self.bot = bot
@@ -55,9 +55,9 @@ class Tags(Extension):
         try:
             async for tag in TagStorage.find({}):
                 await self.get_tag(tag.name)
-            logger.info(f"Cached {len(self.tags)} tags")
+            self.logger.info(f"Cached {len(self.tags)} tags")
         except Exception as e:
-            logger.error(e)
+           self.logger.error(e)
     
     async def get_tag(self, tag_name: str) -> TagStorage:
         try:
@@ -67,7 +67,7 @@ class Tags(Extension):
             self.tags[tag_name] = tag
             return tag
         except Exception as e:
-            logger.error(e)
+            self.logger.error(e)
 
     @slash_command(
         name="tag",
@@ -112,7 +112,7 @@ class Tags(Extension):
                                             channelId = channel.id
                                             mention[i] = mention[i].replace('#', '').replace(channel_mention, f'<#{channelId}>', 1)
                                     except Exception as e:
-                                        logger.error(e)
+                                        self.logger.error(e)
                                         mention[i] = mention[i]
                         except:
                             content = content
@@ -120,7 +120,7 @@ class Tags(Extension):
                             content = '\n'.join(mention)
             await ctx.send(content)
         except Exception as e:
-            logger.error(e)
+            self.logger.error(e)
     
     @slash_command(
         name="tag-create", 
@@ -164,7 +164,7 @@ class Tags(Extension):
         try:
             self.tags.pop(name.lower().replace("_", " "))
         except Exception as e:
-            logger.error(e)
+            self.logger.error(e)
         await tag.delete()
         await ctx.send(f"Deleted tag `{name}`", ephemeral=True)
     
@@ -257,7 +257,7 @@ class Tags(Extension):
                     self.tags[name] = tag
                 await ctx.send(f"{'Edited' if edit_mode else 'Created'} `{name}`", ephemeral=True)
         except Exception as e:
-            logger.error(e)
+            self.logger.error(e)
             await ctx.send("An error occurred", ephemeral=True)
 
     @slash_command(
@@ -272,7 +272,7 @@ class Tags(Extension):
                await self.get_tag(tag.name)
             await ctx.send(f"Updated tag cache\nCached {len(self.tags)}", ephemeral=True)
         except Exception as e:
-            logger.error(e)
+            self.logger.error(e)
             await ctx.send(f"An error occurred while caching tags.\n{e}", ephemeral=True)
 
 

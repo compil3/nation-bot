@@ -20,6 +20,8 @@ from rich import box
 
 logger.add("./logs/tables.log", format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO", rotation="50 MB", retention="5 days", compression="zip")
 logo = "https://proclubsnation.com/wp-content/uploads/2021/10/PCN_logo_new.png"
+
+# League Tabls
 class Tables(Extension):
 
     # @check(user_has_player_role())

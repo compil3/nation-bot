@@ -1,0 +1,28 @@
+{
+    "default": {
+      "version": "2.2.0",
+      "name": "Nation Bot",
+      "bot_url": "https://github.com/compil3/pcn-snek",
+      "ping_on_error": true,
+      "urls": {
+        "find_player": "https://proclubsnation.com/wp-json/sportspress/v2/players?search={}",
+        "players": "https://proclubsnation.com/wp-json/sportspress/v2/players?slug={} ",
+        "teams": "https://proclubsnation.com/wp-json/sportspress/v2/teams",
+        "tables": "https://proclubsnation.com/wp-json/sportspress/v2/tables?slug={}",
+        "schedules": "https://proclubsnation.com/wp-json/sportspress/v2/calendars?slug={}"
+      },
+      "debug": {
+        "debug_set": true,
+        "pcn": {
+          "player_role": 449043802829750272,
+          "waiting_verification_role": 1001999651429425233,
+          "thread_pit": 1006423045071716475
+        },
+        "debug_roles": {
+          "player_role": 843899510483976233,
+          "waiting_verification_role": 1001837608030195882,
+          "thread_pit": 1001904610002350140
+        }
+      }
+    }
+  }

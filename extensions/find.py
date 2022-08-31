@@ -1,12 +1,14 @@
 from datetime import datetime
 from beanie import Document
-from naff import (Extension, Embed, slash_command, slash_option, InteractionContext, context_menu, Permissions, CommandTypes)
+from naff import (Extension, Embed, slash_command, slash_option, InteractionContext, context_menu, Permissions, CommandTypes, logger_name)
 from naff.models.discord.color import MaterialColors
+from naff.client.errors import NotFound
 import aiohttp
 import json
-from loguru import logger
+# from loguru import logger
 import re
 import orjson
+import logging
 
 # TODO: Add guild ids to a json config file instead of hardcoring them
 # TODO: Make the data retrieval async in all user facing commands
@@ -25,7 +27,7 @@ class Registered(Document):
 # used to look up a discord member's gamer tag and return if they exist on pcn.
 class PlayerFinder(Extension):
 
-
+    logger = logging.getLogger(logger_name)
     def D_Embed(self, title: str) -> Embed:
         e = Embed(
             f"PCN Player Lookup: {title}",
@@ -60,6 +62,9 @@ class PlayerFinder(Extension):
                     if request.status == 200:
                         gt_lookup = await request.text()
                         search_responsea = orjson.loads(gt_lookup)
+
+                        if len(search_responsea) < 1:
+                            raise Exception
                         for db_player in search_responsea:
                             if re.match(gamertag, db_player['title']['rendered'], flags=re.I):
                                 async with session.get(self.bot.config.urls.players.format(db_player['slug'])) as gamertag_lookup:
@@ -84,10 +89,10 @@ class PlayerFinder(Extension):
                                         e = self.D_Embed("Connection Error")
                                         e.description = "Failed to connect to API.\n\n{e}\n\nTry again later."
                                         await ctx.send(embeds=[e])
-        except ValueError:
+        except Exception:
             e = self.D_Embed("Results")
             e.description = f":x:\n**{gamertag}** has been not found."
-            logger.error(f"ValueError in /find: {e}")
+            self.logger.info(f"{gamertag} has no profile on PCN.")
             await ctx.send(embeds=[e])
             
 

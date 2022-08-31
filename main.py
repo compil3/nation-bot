@@ -21,7 +21,7 @@ from config import ConfigLoader
 
 # logger.add("./logs/main.log", format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO", rotation="5MB", retention="5 days", compression="zip")
 dev = False
-
+logger = logging.getLogger(logger_name)
 #The start of the bot.
 class Bot(Client):
     logger = logging.getLogger(logger_name)
@@ -96,16 +96,16 @@ class Bot(Client):
             self.logger.info(f"Logged in as {self.user}.")
             self.logger.info(f"Extensions: {', '.join(self.ext)}")
 
-    # async def on_command_error(self, ctx: InteractionContext, error: Exception, *args, **kwargs):
-    #     unexpected = True
-    #     if isinstance(error, errors.CommandCheckFailure):
-    #         unexpected = False
-    #         await send_error(ctx, "Command check failed!\nSorry, but it looks like you don't have permission to use this commands.")
-    #     else:
-    #         await send_error(ctx, str(error)[:2000] or "<No exception text available>")
+    async def on_command_error(self, ctx: InteractionContext, error: Exception, *args, **kwargs):
+        unexpected = True
+        if isinstance(error, errors.CommandCheckFailure):
+            unexpected = False
+            await send_error(ctx, "Command check failed!\nSorry, but it looks like you don't have permission to use this commands.")
+        else:
+            await send_error(ctx, str(error)[:2000] or "<No exception text available>")
 
-        # if unexpected:
-        #     self.logger.error(f"Exception during command execution: {repr(error)}", exc_info=error)
+        if unexpected:
+            self.logger.error(f"Exception during command execution: {repr(error)}", exc_info=error)
 
     async def on_command(self, ctx: Context):
         _command_name = ctx.invoke_target
@@ -124,11 +124,11 @@ class Bot(Client):
         self.models.append(model)
 
 
-# async def send_error(ctx, msg):
-#     if ctx is not None:
-#         await ctx.send(msg, allowed_mentions=AllowedMentions.none(), ephemeral=True)
-#     else:
-#         logger.warning(f"Already responded to message, error message: {msg}")
+async def send_error(ctx, msg):
+    if ctx is not None:
+        await ctx.send(msg, allowed_mentions=AllowedMentions.none(), ephemeral=True)
+    else:
+        logger.warning(f"Already responded to message, error message: {msg}")
 
 def main():
     current_dir = Path(__file__).parent

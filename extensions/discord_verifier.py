@@ -104,11 +104,11 @@ class DiscordVerification(Extension):
                                 await ctx.author.add_role(await RoleConverter().convert(ctx, "Waiting Verification"), "Waiting for verification.")
                                 await ctx.author.remove_role(await RoleConverter().convert(ctx, "New Member"), "Verification started")
 
-                                thread = await channel.create_public_thread(
+                                thread = await channel.create_private_thread(
                                     name=f"{ctx.author.display_name}'s Verification",
                                     auto_archive_duration=AutoArchiveDuration.ONE_WEEK,
                                     reason="Verification Thread",
-                                    # invitable=True,
+                                    invitable=False,
                                 )
                                 await thread.add_member(ctx.author.id)
 

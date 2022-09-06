@@ -93,7 +93,7 @@ class Tags(Extension):
                         mention = tag.content.split('\n')
                         try:
                             for i in range(len(mention)):
-                                if '@' in mention[i]:
+                                if '@' in mention[i] and 'everyone' not in mention[i]:
                                     user_mention = mention[i].split('@')[1].split(' ')[0]
                                     try:
                                         if await UserConverter().convert(ctx, user_mention):                                            
@@ -118,6 +118,8 @@ class Tags(Extension):
                             content = content
                         else:
                             content = '\n'.join(mention)
+                else:
+                    content = tag.content
             await ctx.send(content)
         except Exception as e:
             self.logger.error(e)

@@ -2,7 +2,7 @@
     "default": {
       "version": "2.2.0",
       "name": "Nation Bot",
-      "bot_url": "https://github.com/compil3/pcn-snek",
+      "bot_url": "https://github.com/compil3/nation-bot",
       "ping_on_error": true,
       "urls": {
         "find_player": "https://proclubsnation.com/wp-json/sportspress/v2/players?search={}",
@@ -12,7 +12,7 @@
         "schedules": "https://proclubsnation.com/wp-json/sportspress/v2/calendars?slug={}"
       },
       "debug": {
-        "debug_set": false,
+        "debug_set": true,
         "pcn": {
           "player_role": 449043802829750272,
           "waiting_verification_role": 1001999651429425233,

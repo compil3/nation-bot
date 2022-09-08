@@ -93,6 +93,10 @@ class DiscordVerification(Extension):
         threads = await ChannelConverter().convert(ctx, "verification-threads")
         channel = await self.bot.fetch_channel(threads.id)
         current_tag = ctx.responses.get("gamertag")
+        if "https://proclubsnation.com/members" in current_tag:
+            current_tag = current_tag.replace("https://proclubsnation.com/members/", "")
+        elif "https://proclubsnation.com/player/" in current_tag:
+            current_tag = current_tag.replace("https://proclubsnation.com/player/", "")
         previous_tag = ctx.responses.get("previous_gamertag")
         try:
             async with aiohttp.ClientSession() as session:
@@ -104,11 +108,11 @@ class DiscordVerification(Extension):
                                 await ctx.author.add_role(await RoleConverter().convert(ctx, "Waiting Verification"), "Waiting for verification.")
                                 await ctx.author.remove_role(await RoleConverter().convert(ctx, "New Member"), "Verification started")
 
-                                thread = await channel.create_private_thread(
+                                thread = await channel.create_public_thread(
                                     name=f"{ctx.author.display_name}'s Verification",
                                     auto_archive_duration=AutoArchiveDuration.ONE_WEEK,
                                     reason="Verification Thread",
-                                    invitable=False,
+                                    # invitable=False,
                                 )
                                 await thread.add_member(ctx.author.id)
 
@@ -116,13 +120,17 @@ class DiscordVerification(Extension):
                                     previous_tag = "--"
 
                                 await thread.send(
-                                    f"This thread was created automatically by the bot due to your Gamer Tag not being found.\n\n"                                
-                                    f"**Provided Information:**\n\n"
+                                    f"Welcome to your verification thread, {ctx.author.mention}."
+                                    "\nThis thread was created automatically by the bot due to your Gamer Tag not being found.\n\n"
+                                    "**Provided Information:**\n\n"
                                     f"Gamertag: **{current_tag}**\n"
                                     f"Previous Gamertags: **{previous_tag}**\n"
-                                    f"Verified Onsite: **False**\n"         
-                                    f"\n\nWelcome to your verification thread, {ctx.author.mention}."
-                                    f"\n**Please post a message here to verify you are in this thread.**"                       
+                                    "Verified Onsite: **False**"         
+                                    "\n\n**Please make sure you have Direct Messages enabled for this server."
+                                    "\nYou will be notified via DM when access is granted.**"
+                                    "\nTo enble DMs for this server only on mobile, click server name > Allow Direct Messages."
+                                    "\nTo enable DMs for this server only on desktop, click server name > Privacy Settings > Allow Direct Messages."
+                                    "\n\n**Discord verifications are automatically checked every 24 hours.**"
                                 )
 
                 
@@ -163,13 +171,17 @@ class DiscordVerification(Extension):
                                                     previous_tag = "--"
 
                                                 await thread.send(
-                                                    f"This thread was created automatically by the bot due to your Gamer Tag not being found.\n\n"                                
-                                                    f"**Provided Information:**\n\n"
+                                                    f"Welcome to your verification thread, {ctx.author.mention}."
+                                                    "\nThis thread was created automatically by the bot due to your Gamer Tag not being found.\n\n"
+                                                    "**Provided Information:**\n\n"
                                                     f"Gamertag: **{current_tag}**\n"
                                                     f"Previous Gamertags: **{previous_tag}**\n"
-                                                    f"Verified Onsite: **False**\n"         
-                                                    f"\n\nWelcome to your verification thread, {ctx.author.mention}."
-                                                    f"\n**Please post a message here to verify you are in this thread.**"                       
+                                                    "Verified Onsite: **False**"         
+                                                    "\n\n**Please make sure you have Direct Messages enabled for this server."
+                                                    "\nYou will be notified via DM when access is granted.**"
+                                                    "\nTo enble DMs for this server only on mobile, click server name > Allow Direct Messages."
+                                                    "\nTo enable DMs for this server only on desktop, click server name > Privacy Settings > Allow Direct Messages."
+                                                    "\n\n**Discord verifications are automatically checked every 24 hours.**"
                                                 )
 
                                 
@@ -212,7 +224,7 @@ class DiscordVerification(Extension):
                                     ShortText(
                                         label="Gamer Tag",
                                         custom_id="gamertag",
-                                        placeholder="Found in profile url: proclubsnation.com/members/GAMERTAG",
+                                        placeholder="Found in profile url: proclubsnation.com/player/GAMERTAG",
                                         required=True,
                                     ),
                                     ShortText(

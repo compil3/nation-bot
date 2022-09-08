@@ -1,16 +1,16 @@
+# from loguru import logger
 import logging
+from functools import cache
+
 from beanie import Document
+from naff import (CommandTypes, Embed, Extension, InteractionContext, Member,
+                  OptionTypes, Permissions, check, context_menu, logger_name,
+                  slash_command, slash_option)
+from naff.ext.paginators import Paginator
+from naff.models.naff import Buckets, cooldown
 from utils.player_builder import PlayerBuilder
 from utils.stat_builder import PlayerStatsBuilder
 
-from functools import cache
-# from loguru import logger
-import logging
-from naff import (CommandTypes, Embed, Extension, InteractionContext, Member,
-                  OptionTypes, Permissions, check, context_menu, slash_command,
-                  slash_option, logger_name)
-from naff.ext.paginators import Paginator
-from naff.models.naff import cooldown, Buckets
 
 class UserRegistration(Document):
     user_id: int
@@ -62,7 +62,7 @@ class PlayerStats(Extension):
                 self.logger.error(e) 
         elif gamertag is not None:
             try:
-                display = await PlayerBuilder.builder(self, gamertag.lower())
+                display = await PlayerStatsBuilder.builder(self, gamertag.lower())
                 if display is not None:
                     try:
                         paginator = Paginator.create_from_embeds(self.bot, *display)

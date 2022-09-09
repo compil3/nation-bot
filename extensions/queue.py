@@ -62,18 +62,17 @@ class Queue(Extension):
                         if resp.status == 200:
                             lookup = await resp.json()
                             if not lookup:
-                                raise IndexError                           
-                            else:
-                                # lookupData = json.loads(lookup)
-                                try:
-                                    member = await Guild.fetch_member(ctx.guild, playerInDb.discord_id)
-                                    await member.add_role(await RoleConverter().convert(ctx, "Player"))
-                                    await member.edit_nickname(f"{playerInDb.gamertag}", "Verified user name change.")
-                                    if await RoleConverter().convert(ctx, "Waiting Verification") in member.roles:
-                                        await member.remove_role(await RoleConverter().convert(ctx, "Waiting Verification"), "Removed from Waiting Verification role.")
-                                    await playerInDb.delete()
-                                except Exception as e:
-                                    logger.error(e)
+                                raise IndexError
+                            # lookupData = json.loads(lookup)
+                            try:
+                                member = await Guild.fetch_member(ctx.guild, playerInDb.discord_id)
+                                await member.add_role(await RoleConverter().convert(ctx, "Player"))
+                                await member.edit_nickname(f"{playerInDb.gamertag}", "Verified user name change.")
+                                if await RoleConverter().convert(ctx, "Waiting Verification") in member.roles:
+                                    await member.remove_role(await RoleConverter().convert(ctx, "Waiting Verification"), "Removed from Waiting Verification role.")
+                                await playerInDb.delete()
+                            except Exception as e:
+                                logger.error(e)
                     except IndexError:
                         embed = Embed("Verification Queue", description=f"User: `{playerInDb.discord_name}`")
                         embed.add_field("Gamertag", playerInDb.gamertag, inline=False)

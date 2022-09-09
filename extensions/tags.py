@@ -235,29 +235,26 @@ class Tags(Extension):
         try:
             tag_lookup = await TagStorage.find_one(TagStorage.name == name.lower().replace("_", " "))
             if not edit_mode and tag_lookup:
-                    return await ctx.send(f"A tag with the name `{name}` already exists")
-            else:
-                if edit_mode:
-                    tag = tag_lookup
-                    tag.name = name.lower()
-                    tag.modifier_id = ctx.author.id
-                    tag.modified = datetime.now()
-                    tag.content = content
-                if not tag:
-                    tag = TagStorage(
-                        name=name.lower(),
-                        content=content,
-                        author_id=ctx.author.id,
-                        creation=datetime.now(),
-                        guild=ctx.guild.id,
-                    )
-                await tag.save()
-                if edit_mode:
-                    self.tags.pop(name.lower().replace("_", " "))
-                    self.tags[name] = tag
-                else:
-                    self.tags[name] = tag
-                await ctx.send(f"{'Edited' if edit_mode else 'Created'} `{name}`", ephemeral=True)
+                return await ctx.send(f"A tag with the name `{name}` already exists")
+            if edit_mode:
+                tag = tag_lookup
+                tag.name = name.lower()
+                tag.modifier_id = ctx.author.id
+                tag.modified = datetime.now()
+                tag.content = content
+            if not tag:
+                tag = TagStorage(
+                    name=name.lower(),
+                    content=content,
+                    author_id=ctx.author.id,
+                    creation=datetime.now(),
+                    guild=ctx.guild.id,
+                )
+            await tag.save()
+            if edit_mode:
+                self.tags.pop(name.lower().replace("_", " "))
+            self.tags[name] = tag
+            await ctx.send(f"{'Edited' if edit_mode else 'Created'} `{name}`", ephemeral=True)
         except Exception as e:
             self.logger.error(e)
             await ctx.send("An error occurred", ephemeral=True)

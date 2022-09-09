@@ -52,11 +52,11 @@ class PlayerFinder(Extension):
         await ctx.defer(ephemeral=True)
 
         try:
-            
+
             #save id, slug, link to mongodb for faster lookup
 
             # make gamertag to lowercase
-            
+
             async with aiohttp.ClientSession() as session:
                 async with session.get(self.bot.config.urls.find_player.format(f"{gamertag.lower()}&_fields=title,slug,date,modified,link")) as request:
                     if request.status == 200:
@@ -74,17 +74,16 @@ class PlayerFinder(Extension):
 
                                         if len(player_data) < 1:
                                             raise ValueError
-                                        else:
-                                            for player in player_data:
-                                                # if player["title"]['rendered'].lower() == gamertag.lower:
-                                                if re.match(gamertag, player["title"]['rendered'], flags=re.I):
-                                                    e = self.D_Embed("Results")
-                                                    e.description = f"**{player['title']['rendered']}** :white_check_mark:"
-                                                    e.add_field("Registered", player['date'], inline=True )
-                                                    e.add_field("Last Updated", player['modified'], inline=True )
-                                                    e.add_field("Website Slug", player['slug'], inline=False )
-                                                    e.add_field("PCN Profile", player['link'], inline=True )
-                                                    await ctx.send(embeds=[e])
+                                        for player in player_data:
+                                            # if player["title"]['rendered'].lower() == gamertag.lower:
+                                            if re.match(gamertag, player["title"]['rendered'], flags=re.I):
+                                                e = self.D_Embed("Results")
+                                                e.description = f"**{player['title']['rendered']}** :white_check_mark:"
+                                                e.add_field("Registered", player['date'], inline=True )
+                                                e.add_field("Last Updated", player['modified'], inline=True )
+                                                e.add_field("Website Slug", player['slug'], inline=False )
+                                                e.add_field("PCN Profile", player['link'], inline=True )
+                                                await ctx.send(embeds=[e])
                                     else:
                                         e = self.D_Embed("Connection Error")
                                         e.description = "Failed to connect to API.\n\n{e}\n\nTry again later."
@@ -122,22 +121,20 @@ class PlayerFinder(Extension):
 
                         if len(player_lookup) < 1:
                             raise ValueError
-                        else:
-                            e = self.D_Embed("Results")
-                            e.description = f"**{player_lookup[0]['title']['rendered']}** :white_check_mark:"
-                            e.add_field("Registered", player_lookup[0]['date'], inline=True )
-                            e.add_field("Last Updated", player_lookup[0]['modified'], inline=True )
-                            e.add_field(
-                                "Registered GT", find_user.registered_gamer_tag, inline=False
-                            )
-                            e.add_field("Discord ID", str(member))
-                            e.add_field("Website Slug", player_lookup[0]['slug'], inline=False )
-                            e.add_field("PCN Profile", player_lookup[0]['link'], inline=True )
-                            await ctx.send(embeds=[e])
+                        e = self.D_Embed("Results")
+                        e.description = f"**{player_lookup[0]['title']['rendered']}** :white_check_mark:"
+                        e.add_field("Registered", player_lookup[0]['date'], inline=True )
+                        e.add_field("Last Updated", player_lookup[0]['modified'], inline=True )
+                        e.add_field(
+                            "Registered GT", find_user.registered_gamer_tag, inline=False
+                        )
+                        e.add_field("Discord ID", str(member))
+                        e.add_field("Website Slug", player_lookup[0]['slug'], inline=False )
+                        e.add_field("PCN Profile", player_lookup[0]['link'], inline=True )
                     else:
                         e = self.D_Embed("Connection Error")
                         e.description = "Failed to connect to API.\n\n{e}\n\nTry again later."
-                        await ctx.send(embeds=[e])
+                    await ctx.send(embeds=[e])
         except ValueError:
             e = self.D_Embed("Results")
             e.description = f"**{member.display_name}** is not registered with Bot."

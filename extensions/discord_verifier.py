@@ -35,13 +35,14 @@ class DiscordVerification(Extension):
     logger = logging.getLogger(logger_name)
     @prefixed_command()
     async def verify_init(self, ctx: PrefixedContext):
-        if ctx.author.id == 111252573054312448 or ctx.author.id == 421064675267051531:
-            await ctx.message.delete()
-            threads = await ChannelConverter().convert(ctx, "verification-threads")
-            general = await ChannelConverter().convert(ctx, "general-discussion")
-            embed = Embed(
-                title="Welcome to PCN Discord",
-                description=f"""1.    Discord is provided as a courtesy by the owners of PCN, meaning that it is a privilege, not a right
+        if ctx.author.id not in [111252573054312448, 421064675267051531]:
+            return
+        await ctx.message.delete()
+        threads = await ChannelConverter().convert(ctx, "verification-threads")
+        general = await ChannelConverter().convert(ctx, "general-discussion")
+        embed = Embed(
+            title="Welcome to PCN Discord",
+            description=f"""1.    Discord is provided as a courtesy by the owners of PCN, meaning that it is a privilege, not a right
                 2.    Show respect to all Staff members, Managers, and Players at all times
                 3.    <#{general.id}> is the only chat that can be used for cutting up or friendly banter
                 4.    All special chat channels are to be used ONLY for their intended purposes. Repeated abuse of this rule may lead to disciplinary action and possible stripping of roles on Discord
@@ -62,30 +63,30 @@ class DiscordVerification(Extension):
                 To gain access to PCN Discord, press "Start Verification".\nOnce you have, check the <#{threads.id}> channel for your thread.\n
                 If you are looking to join our UFC League, please press the PCN UFC button below.\n
                 """,
-                color=BrandColors.BLURPLE
-            )
-            # 1006193707197935626
-            icon = PartialEmoji.from_str("<:rotating_light:1006193707197935626>")
-            try:
-                components: list[ActionRow] = [
-                    ActionRow(
-                        Button(
-                            style=ButtonStyles.BLURPLE,
-                            label="Start Verification", 
-                            # emoji="✉️",
-                            custom_id="create_verification_thread",
-                        ),
-                        Button(
-                            style=ButtonStyles.BLURPLE,
-                            label="PCN UFC",
-                            custom_id="pcn_ufc",
-                        )
+            color=BrandColors.BLURPLE
+        )
+        # 1006193707197935626
+        icon = PartialEmoji.from_str("<:rotating_light:1006193707197935626>")
+        try:
+            components: list[ActionRow] = [
+                ActionRow(
+                    Button(
+                        style=ButtonStyles.BLURPLE,
+                        label="Start Verification", 
+                        # emoji="✉️",
+                        custom_id="create_verification_thread",
+                    ),
+                    Button(
+                        style=ButtonStyles.BLURPLE,
+                        label="PCN UFC",
+                        custom_id="pcn_ufc",
                     )
-                ]
-            except Exception as e:
-                self.logger.error(e)
-            embed.set_footer("PCN Staff", icon_url=logo) 
-            await ctx.send(embeds=embed, components=components)
+                )
+            ]
+        except Exception as e:
+            self.logger.error(e)
+        embed.set_footer("PCN Staff", icon_url=logo)
+        await ctx.send(embeds=embed, components=components)
 
     @modal_callback("verification_thread_modal")
     async def create_thread(self, ctx: ModalContext):
@@ -101,45 +102,45 @@ class DiscordVerification(Extension):
                         gt_lookup = await resp.text()
                         search_response = orjson.loads(gt_lookup)
                         if len(search_response) < 1:
-                                await ctx.author.add_role(await RoleConverter().convert(ctx, "Waiting Verification"), "Waiting for verification.")
-                                await ctx.author.remove_role(await RoleConverter().convert(ctx, "New Member"), "Verification started")
+                            await ctx.author.add_role(await RoleConverter().convert(ctx, "Waiting Verification"), "Waiting for verification.")
+                            await ctx.author.remove_role(await RoleConverter().convert(ctx, "New Member"), "Verification started")
 
-                                thread = await channel.create_private_thread(
-                                    name=f"{ctx.author.display_name}'s Verification",
-                                    auto_archive_duration=AutoArchiveDuration.ONE_WEEK,
-                                    reason="Verification Thread",
-                                    invitable=False,
+                            thread = await channel.create_private_thread(
+                                name=f"{ctx.author.display_name}'s Verification",
+                                auto_archive_duration=AutoArchiveDuration.ONE_WEEK,
+                                reason="Verification Thread",
+                                invitable=False,
+                            )
+                            await thread.add_member(ctx.author.id)
+
+                            if not previous_tag:
+                                previous_tag = "--"
+
+                            await thread.send(
+                                f"This thread was created automatically by the bot due to your Gamer Tag not being found.\n\n"                                
+                                f"**Provided Information:**\n\n"
+                                f"Gamertag: **{current_tag}**\n"
+                                f"Previous Gamertags: **{previous_tag}**\n"
+                                f"Verified Onsite: **False**\n"         
+                                f"\n\nWelcome to your verification thread, {ctx.author.mention}."
+                                f"\n**Please post a message here to verify you are in this thread.**"                       
+                            )
+
+
+                            await ctx.send(f"{ctx.author.mention} Your verification thread has been created here: {thread.mention}", ephemeral=True)
+
+                            existing_verification = await VerificationQueue.find_one({"discord_id": ctx.author.id})
+                            if existing_verification is None:    
+                                waiting_verification = VerificationQueue(
+                                    discord_id=ctx.author.id,
+                                    discord_name=ctx.author.display_name,
+                                    gamertag=current_tag,
+                                    status="New",
+                                    reason="Waiting for website verification",
+                                    updated=datetime.now(),
+                                    discord_thread=thread.id,
                                 )
-                                await thread.add_member(ctx.author.id)
-
-                                if not previous_tag:
-                                    previous_tag = "--"
-
-                                await thread.send(
-                                    f"This thread was created automatically by the bot due to your Gamer Tag not being found.\n\n"                                
-                                    f"**Provided Information:**\n\n"
-                                    f"Gamertag: **{current_tag}**\n"
-                                    f"Previous Gamertags: **{previous_tag}**\n"
-                                    f"Verified Onsite: **False**\n"         
-                                    f"\n\nWelcome to your verification thread, {ctx.author.mention}."
-                                    f"\n**Please post a message here to verify you are in this thread.**"                       
-                                )
-
-                
-                                await ctx.send(f"{ctx.author.mention} Your verification thread has been created here: {thread.mention}", ephemeral=True)
-
-                                existing_verification = await VerificationQueue.find_one({"discord_id": ctx.author.id})
-                                if existing_verification is None:    
-                                    waiting_verification = VerificationQueue(
-                                        discord_id=ctx.author.id,
-                                        discord_name=ctx.author.display_name,
-                                        gamertag=current_tag,
-                                        status="New",
-                                        reason="Waiting for website verification",
-                                        updated=datetime.now(),
-                                        discord_thread=thread.id,
-                                    )
-                                    await waiting_verification.save()
+                                await waiting_verification.save()
                         else:
                             for db_player in search_response:
                                 if re.match(current_tag, db_player['title']['rendered'], flags=re.I):
@@ -148,7 +149,7 @@ class DiscordVerification(Extension):
                                             lookup = await gamertag_lookup.text()
                                             player_found = orjson.loads(lookup)
 
-                                            if len(player_found) < 1:                                            
+                                            if len(player_found) < 1:
                                                 await ctx.author.add_role(await RoleConverter().convert(ctx, "Waiting Verification"), "Waiting for verification.")
                                                 await ctx.author.remove_role(await RoleConverter().convert(ctx, "New Member"), "Verification started")
                                                 thread = await channel.create_public_thread(
@@ -172,7 +173,7 @@ class DiscordVerification(Extension):
                                                     f"\n**Please post a message here to verify you are in this thread.**"                       
                                                 )
 
-                                
+
                                                 await ctx.send(f"{ctx.author.mention} Your verification thread has been created here: {thread.mention}", ephemeral=True)
 
                                                 existing_verification = await VerificationQueue.find_one({"discord_id": ctx.author.id})
@@ -187,8 +188,6 @@ class DiscordVerification(Extension):
                                                         discord_thread=thread.id,
                                                     )
                                                     await waiting_verification.save()
-                                                else:
-                                                    pass
                                             else:
                                                 try:
                                                     await ctx.author.add_role(await RoleConverter().convert(ctx, "Player"), "Granted Access")

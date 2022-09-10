@@ -1,6 +1,6 @@
 import asyncio
-import os
 import logging
+import os
 from http.client import HTTPException
 from pathlib import Path
 from sys import platform
@@ -14,10 +14,9 @@ from naff import (AllowedMentions, Client, Intents, InteractionContext, errors,
                   listen, logger_name)
 from naff.models.naff.context import Context
 
-from utils.init_logging import init_logging
-
 from config import ConfigLoader
-
+from extensions import queue
+from utils.init_logging import init_logging
 
 # logger.add("./logs/main.log", format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO", rotation="5MB", retention="5 days", compression="zip")
 dev = False
@@ -56,7 +55,6 @@ class Bot(Client):
                     python_import_path = path.replace("/", ".").replace("\\", ".")
                     self.load_extension(python_import_path)
 
-
     async def startup(self):
         self.load_extension('sentry', token=self.config.sentry_token)
         self.get_extension()
@@ -70,7 +68,9 @@ class Bot(Client):
         else:
             await self.astart(self.config.discord_token)
 
-        # jurigged.watch(pattern="*.py")
+    # @listen()
+    # async def on_startup(self):
+    #     queue.check_queue.start()
 
              
     @listen()

@@ -5,13 +5,13 @@ import subprocess
 import git
 import psutil
 import httpx
-
+import logging
 from io import BytesIO
 from pathlib import Path
 from aiofile import AIOFile, LineReader
 from helpers.updates import update
-from loguru import logger
-from naff import BrandColors, Guild, GuildCategory, GuildText, GuildVoice
+import naff
+from naff import BrandColors, Guild, GuildCategory, GuildText, GuildVoice, logger_name
 from naff.client.const import __py_version__, __version__
 from naff.ext.debug_extension import utils as _d_utils
 from naff.models import Embed, Extension, MaterialColors, Timestamp
@@ -65,6 +65,7 @@ def get_size(bytes, suffix="B"):
 
 #Bot Information and Utility Functions
 class BotInfo (Extension):
+    logger = logging.getLogger(logger_name)
     def UpdateEmbed(self, title: str) -> Embed:
         e = Embed(
             title="Update Status",
@@ -174,6 +175,29 @@ class BotInfo (Extension):
 
         await ctx.send(embeds=[e])
 
+    @debug_info.subcommand("stats", sub_cmd_description="Get some stats about the bot.")   
+    async def _stats(self, ctx: InteractionContext) -> None:
+        await ctx.defer(ephemeral=True)
+        embed = Embed("Nation Bot Stats", color=BrandColors.BLURPLE)
+
+        #get commit hash
+        git_hash = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"]).decode("ascii").strip()
+
+        embed.add_field(name="Guilds", value=str(len(self.bot.guilds)))
+        embed.add_field(name="Cached Users", value=str(len(self.bot.cache.user_cache)))
+
+
+        embed.add_field(
+            name="NAFF version",
+            value=f"[{naff.const.__version__}](https://github.com/NAFTeam/NAFF/releases/tag/NAFF-{naff.const.__version__})",
+        )
+        embed.add_field(
+            name="Nation Bot Commit", value=f"[{git_hash}](https://github.com/compil3/nation-bot/commit/{git_hash})"
+        )
+        embed.set_thumbnail(url=self.bot.user.avatar.url)
+        await ctx.send(embed=embed)
+
+
     @debug_info.subcommand("lines", sub_cmd_description="Get PCN Bot lines of code")
     async def _lines(self, ctx: InteractionContext) -> None:
         await ctx.defer(ephemeral=True)
@@ -232,8 +256,8 @@ class BotInfo (Extension):
             console = Console()
             with console.capture() as capture:
                 console.print(status.table)
-            logger.debug(capture.get())
-            logger.debug(len(capture.get()))
+            self.logger.debug(capture.get())
+            self.logger.debug(len(capture.get()))
             added = "\n".join(status.added)
             removed = "\n".join(status.removed)
             changed = "\n".join(status.changed)
@@ -248,7 +272,7 @@ class BotInfo (Extension):
             if changed:
                 embed.add_field(name="Changed Modules", value=f"```\n{changed}\n```")
             embed.set_footer(text="Bot Updater", icon_url="https://proclubsnation.com/wp-content/uploads/2020/08/PCN_logo_Best.png")
-            logger.debug("Updates Applied.")
+            self.logger.debug("Updates Applied.")
             content = f"```ansi\n{capture.get()}\n```"
             if len(content) < 3000:
                 await ctx.send(content, embeds=embed, ephemeral=True)

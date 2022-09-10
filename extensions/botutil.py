@@ -44,9 +44,7 @@ def strf_delta(time_delta: datetime.timedelta, show_seconds=True) -> str:
         return f"{days_fmt} and {hours_fmt}"
     if hours >= 1:
         return f"{hours_fmt} and {minutes_fmt}"
-    if show_seconds:
-        return f"{minutes_fmt} and {seconds_fmt}"
-    return f"{minutes_fmt}"
+    return f"{minutes_fmt} and {seconds_fmt}" if show_seconds else f"{minutes_fmt}"
 
 
 def get_size(bytes, suffix="B"):
@@ -90,9 +88,9 @@ class BotInfo (Extension):
         )
         return e
 
-    async def get_async(url):
+    async def get_async(self):
         async with httpx.AsyncClient(timeout=None) as client:
-            return await client.get(url)
+            return await client.get(self)
 
     def get_repo_hash(self) -> str:
         repo = git.Repo(".")
@@ -232,10 +230,8 @@ class BotInfo (Extension):
     )
     async def _guild_names(self, ctx:InteractionContext) -> None:
         await ctx.defer(ephemeral=True)
-        guild_list = []
+        guild_list = [f"[ {guild.name} ]" for guild in self.bot.guilds]
 
-        for guild in self.bot.guilds:
-            guild_list.append(f"[ {guild.name} ]")
         embed = Embed(
             title="Guilds",
             description="\n".join(guild_list),
@@ -317,7 +313,7 @@ class BotInfo (Extension):
         embed.set_author(name=guild.name, icon_url=guild.icon.url)
         embed.set_thumbnail(url=guild.icon.url)
         embed.set_footer(text=f"ID: {guild.id} | Server Created")
-        
+
         await ctx.send(embeds=embed, ephemeral=True)
 
     @debug_info.subcommand(sub_cmd_name="restart", sub_cmd_description="Restarts the bot.")

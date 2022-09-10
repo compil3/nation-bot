@@ -59,8 +59,8 @@ class PlayerStats(Extension):
                     await ctx.send("Unable to retreive your stats.  If you discord name does not match your gamertag, you will need to use /stats [gamertag] or no stats could be found.")
                     return
             except Exception as e:
-                self.logger.error(e) 
-        elif gamertag is not None:
+                self.logger.error(e)
+        else:
             try:
                 display = await PlayerStatsBuilder.builder(self, gamertag.lower())
                 if display is not None:

@@ -146,33 +146,23 @@ async def fetch_api(self, doc: Document, session) -> Boolean:
         async with session.get(self.bot.config.urls.find_player.format(f"{doc.gamertag}&_fields=title,link,date,modified,slug")) as resp:
             if resp.status == 200:
                 search_response = await resp.text()
-                db_repsonse = orjson.loads(search_response)
-
-                if not db_repsonse:
+                if not (db_repsonse := orjson.loads(search_response)):
                     return False
-                else:
-                    for db_player in db_repsonse:
-                        if len(db_repsonse) <= 1:                                
-                            async with session.get(self.bot.config.urls.players.format(db_player['slug'])) as gamertag_lookup:
-                                if gamertag_lookup.status == 200:
-                                    lookup_player = await gamertag_lookup.text()
-                                    player_found = orjson.loads(lookup_player)
+                for db_player in db_repsonse:
+                    if len(db_repsonse) <= 1:        
+                        async with session.get(self.bot.config.urls.players.format(db_player['slug'])) as gamertag_lookup:
+                            if gamertag_lookup.status == 200:
+                                lookup_player = await gamertag_lookup.text()
+                                player_found = orjson.loads(lookup_player)
 
-                                    if len(player_found) < 1:
-                                        return False
-                                    else:
-                                        return True
-                        else:
-                            if re.match(doc.gamertag, db_player["title"]['rendered'], flags=re.I):
-                                async with session.get(self.bot.config.urls.players.format(db_player['slug'])) as gamertag_lookup:
-                                    if gamertag_lookup.status == 200:
-                                        lookup_player = await gamertag_lookup.text()
-                                        player_found = orjson.loads(lookup_player)
+                                return len(player_found) >= 1
+                    elif re.match(doc.gamertag, db_player["title"]['rendered'], flags=re.I):
+                        async with session.get(self.bot.config.urls.players.format(db_player['slug'])) as gamertag_lookup:
+                            if gamertag_lookup.status == 200:
+                                lookup_player = await gamertag_lookup.text()
+                                player_found = orjson.loads(lookup_player)
 
-                                        if len(player_found) < 1:
-                                            return False
-                                        else:
-                                            return True
+                                return len(player_found) >= 1
     except Exception as e:
         logger.error(e)
 

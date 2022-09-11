@@ -39,7 +39,7 @@ class Bot(Client):
         )
 
         self.db: Optional[motor_asyncio.AsyncIOMotorClient] = None
-        self.models = list()
+        self.models = []
 
     def get_extension(self):
         self.logger.info("Loading Extensions...")
@@ -76,23 +76,10 @@ class Bot(Client):
     @listen()
     async def on_ready(self):
         msg = f"Logged in as {self.user}.\nCurrent scales: {', '.join(self.ext)}"
-
-        if platform == "linux" or platform == "linux2" or platform == "darwin":
-            # os.system("clear")
+        if platform in ["linux", "linux2", "darwin", "win32"]:
             jurigged.watch(pattern="./extensions/*.py")
-
             self.logger.info(f"--Pro Clubs Nation Bot {self.config.version}")
-            self.logger.info("Connected to {} guild(s)".format(len(self.guilds)))
-            self.logger.info(f"Logged in as {self.user}.")
-            self.logger.info(f"Extensions: {', '.join(self.ext)}")
-
-
-        elif platform == "win32":
-            # os.system('cls')
-            jurigged.watch(pattern="./extensions/*.py")
-
-            self.logger.info(f"--Pro Clubs Nation Bot {self.config.version}")
-            self.logger.info("Connected to {} guild(s)".format(len(self.guilds)))
+            self.logger.info(f"Connected to {len(self.guilds)} guild(s)")
             self.logger.info(f"Logged in as {self.user}.")
             self.logger.info(f"Extensions: {', '.join(self.ext)}")
 

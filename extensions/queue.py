@@ -2,7 +2,6 @@ import logging
 import re
 import time
 from datetime import datetime
-from tkinter import Menu
 from typing import TYPE_CHECKING
 from xmlrpc.client import Boolean
 

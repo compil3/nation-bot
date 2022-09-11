@@ -35,13 +35,12 @@ class DiscordVerification(Extension):
     logger = logging.getLogger(logger_name)
     @prefixed_command()
     async def verify_init(self, ctx: PrefixedContext):
-        if ctx.author.id == 111252573054312448 or ctx.author.id == 421064675267051531:
-            await ctx.message.delete()
-            threads = await ChannelConverter().convert(ctx, "verification-threads")
-            general = await ChannelConverter().convert(ctx, "general-discussion")
-            embed = Embed(
-                title="Welcome to PCN Discord",
-                description=f"""1.    Discord is provided as a courtesy by the owners of PCN, meaning that it is a privilege, not a right
+        if ctx.author.id not in [111252573054312448, 421064675267051531]:
+            return
+        await ctx.message.delete()
+        threads = await ChannelConverter().convert(ctx, "verification-threads")
+        general = await ChannelConverter().convert(ctx, "general-discussion")
+        embed = Embed(title="Welcome to PCN Discord", description=f"""1.    Discord is provided as a courtesy by the owners of PCN, meaning that it is a privilege, not a right
                 2.    Show respect to all Staff members, Managers, and Players at all times
                 3.    <#{general.id}> is the only chat that can be used for cutting up or friendly banter
                 4.    All special chat channels are to be used ONLY for their intended purposes. Repeated abuse of this rule may lead to disciplinary action and possible stripping of roles on Discord
@@ -61,31 +60,16 @@ class DiscordVerification(Extension):
                 
                 To gain access to PCN Discord, press "Start Verification".\nOnce you have, check the <#{threads.id}> channel for your thread.\n
                 If you are looking to join our UFC League, please press the PCN UFC button below.\n
-                """,
-                color=BrandColors.BLURPLE
-            )
-            # 1006193707197935626
-            icon = PartialEmoji.from_str("<:rotating_light:1006193707197935626>")
-            try:
-                components: list[ActionRow] = [
-                    ActionRow(
-                        Button(
-                            style=ButtonStyles.BLURPLE,
-                            label="Start Verification", 
-                            # emoji="✉️",
-                            custom_id="create_verification_thread",
-                        ),
-                        Button(
-                            style=ButtonStyles.BLURPLE,
-                            label="PCN UFC",
-                            custom_id="pcn_ufc",
-                        )
-                    )
-                ]
-            except Exception as e:
-                self.logger.error(e)
-            embed.set_footer("PCN Staff", icon_url=logo) 
-            await ctx.send(embeds=embed, components=components)
+                """, color=BrandColors.BLURPLE)
+
+        icon = PartialEmoji.from_str("<:rotating_light:1006193707197935626>")
+        try:
+            components: list[ActionRow] = [ActionRow(Button(style=ButtonStyles.BLURPLE, label="Start Verification", custom_id="create_verification_thread"), Button(style=ButtonStyles.BLURPLE, label="PCN UFC", custom_id="pcn_ufc"))]
+
+        except Exception as e:
+            self.logger.error(e)
+        embed.set_footer("PCN Staff", icon_url=logo)
+        await ctx.send(embeds=embed, components=components)
 
     @modal_callback("verification_thread_modal")
     async def create_thread(self, ctx: ModalContext):
@@ -93,6 +77,10 @@ class DiscordVerification(Extension):
         threads = await ChannelConverter().convert(ctx, "verification-threads")
         channel = await self.bot.fetch_channel(threads.id)
         current_tag = ctx.responses.get("gamertag")
+        if "https://proclubsnation.com/members" in current_tag:
+            current_tag = current_tag.replace("https://proclubsnation.com/members/", "")
+        elif "https://proclubsnation.com/player/" in current_tag:
+            current_tag = current_tag.replace("https://proclubsnation.com/player/", "")
         previous_tag = ctx.responses.get("previous_gamertag")
         try:
             async with aiohttp.ClientSession() as session:
@@ -116,13 +104,17 @@ class DiscordVerification(Extension):
                                     previous_tag = "--"
 
                                 await thread.send(
-                                    f"This thread was created automatically by the bot due to your Gamer Tag not being found.\n\n"                                
-                                    f"**Provided Information:**\n\n"
+                                    f"Welcome to your verification thread, {ctx.author.mention}."
+                                    "\nThis thread was created automatically by the bot due to your Gamer Tag not being found.\n\n"
+                                    "**Provided Information:**\n\n"
                                     f"Gamertag: **{current_tag}**\n"
                                     f"Previous Gamertags: **{previous_tag}**\n"
-                                    f"Verified Onsite: **False**\n"         
-                                    f"\n\nWelcome to your verification thread, {ctx.author.mention}."
-                                    f"\n**Please post a message here to verify you are in this thread.**"                       
+                                    "Verified Onsite: **False**"         
+                                    "\n\n**Please make sure you have Direct Messages enabled for this server."
+                                    "\nYou will be notified via DM when access is granted.**"
+                                    "\nTo enble DMs for this server only on mobile, click server name > Allow Direct Messages."
+                                    "\nTo enable DMs for this server only on desktop, click server name > Privacy Settings > Allow Direct Messages."
+                                    "\n\n**Discord verifications are automatically checked every 24 hours.**"
                                 )
 
                 
@@ -163,13 +155,17 @@ class DiscordVerification(Extension):
                                                     previous_tag = "--"
 
                                                 await thread.send(
-                                                    f"This thread was created automatically by the bot due to your Gamer Tag not being found.\n\n"                                
-                                                    f"**Provided Information:**\n\n"
+                                                    f"Welcome to your verification thread, {ctx.author.mention}."
+                                                    "\nThis thread was created automatically by the bot due to your Gamer Tag not being found.\n\n"
+                                                    "**Provided Information:**\n\n"
                                                     f"Gamertag: **{current_tag}**\n"
                                                     f"Previous Gamertags: **{previous_tag}**\n"
-                                                    f"Verified Onsite: **False**\n"         
-                                                    f"\n\nWelcome to your verification thread, {ctx.author.mention}."
-                                                    f"\n**Please post a message here to verify you are in this thread.**"                       
+                                                    "Verified Onsite: **False**"         
+                                                    "\n\n**Please make sure you have Direct Messages enabled for this server."
+                                                    "\nYou will be notified via DM when access is granted.**"
+                                                    "\nTo enble DMs for this server only on mobile, click server name > Allow Direct Messages."
+                                                    "\nTo enable DMs for this server only on desktop, click server name > Privacy Settings > Allow Direct Messages."
+                                                    "\n\n**Discord verifications are automatically checked every 24 hours.**"
                                                 )
 
                                 
@@ -212,7 +208,7 @@ class DiscordVerification(Extension):
                                     ShortText(
                                         label="Gamer Tag",
                                         custom_id="gamertag",
-                                        placeholder="Found in profile url: proclubsnation.com/members/GAMERTAG",
+                                        placeholder="Found in profile url: proclubsnation.com/player/GAMERTAG",
                                         required=True,
                                     ),
                                     ShortText(

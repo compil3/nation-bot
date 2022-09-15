@@ -57,7 +57,7 @@ class Queue(Extension):
             channel: ThreadChannel =  await self.bot.fetch_channel(playerInDb.discord_thread)
             async with aiohttp.ClientSession() as session:
                 if await fetch_api(self,playerInDb, session):
-                    logger.info(f"Player in db found.\n{playerInDb.discord_name} - {playerInDb.gamertag}")
+                    logger.info(f"{playerInDb.discord_name} - {playerInDb.gamertag} found in db.  Auto approving and removing {playerInDb.discord_thread}.")
                     member = await Guild.fetch_member(ctx.guild, playerInDb.discord_id)
                     if await RoleConverter().convert(ctx, "Waiting Verification") in member.roles:
                         await member.remove_role(await RoleConverter().convert(ctx, "Waiting Verification"), "Removed from role.")
@@ -68,7 +68,7 @@ class Queue(Extension):
                     try:
                         await member.send(f"{member.mention} you have been verified and have been granted access to the PCN Discord.", ephermal=True)
                     except Exception as e:
-                        logger.error(f"Error sending message to user: {e}") 
+                        logger.error(f"Error sending message to user {member.display_name}: {e}") 
                 else:
                     embed = Embed("Verification Queue", description=f"User: `{playerInDb.discord_name}`")
                     embed.add_field("Gamertag", playerInDb.gamertag, inline=False)
@@ -100,11 +100,11 @@ class Queue(Extension):
             try:
                 await member.send(f"{member.mention} you have been verified and have been granted access to the PCN Discord.", ephermal=True)
             except Exception as e:
-                logger.error(f"Error sending message to user: {e}")
+                logger.error(f"Error sending message to user {member.display_name}: {e}")
         except Exception as e:
             logger.error(e)
 
-    @Task.create(IntervalTrigger(hours=24))
+    @Task.create(IntervalTrigger(hours=48))
     async def check_queue(self):
         print("Task started at: ", datetime.now())
         async for playerWaiting in VerificationQueue.find(VerificationQueue.status == "New"):
@@ -131,7 +131,7 @@ class Queue(Extension):
                         try:
                             await member.send(f"{member.mention} you have been verified and have been granted access to the PCN Discord.", ephermal=True)
                         except Exception as e:
-                            logger.error(f"Error sending message to user: {e}")
+                            logger.error(f"Error sending message to user {member.display_name}: {e}")
                     except Exception as e:
                         logger.error(e)
                 else:

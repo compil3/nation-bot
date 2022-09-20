@@ -135,7 +135,7 @@ class Queue(Extension):
                     except Exception as e:
                         logger.error(e)
                 else:
-                    await channel.send(f"Hey {member.mention},\nPlease bear with us as we are working through our verification queue and we will get to your application as soon as we can.\nThanks for your patience.")
+                    await channel.send(f"Hey {member.mention},\nThis is an automated message letting you know we are still working through our verficiation queue.\n\nThanks for your patience.")
                     logger.info(f"User: {playerWaiting.discord_name} is still waiting for verification.")
 
 

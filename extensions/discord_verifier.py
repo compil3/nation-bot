@@ -114,7 +114,7 @@ class DiscordVerification(Extension):
                                     "\nYou will be notified via DM when access is granted.**"
                                     "\nTo enble DMs for this server only on mobile, click server name > Allow Direct Messages."
                                     "\nTo enable DMs for this server only on desktop, click server name > Privacy Settings > Allow Direct Messages."
-                                    "\n\n**Discord verifications are automatically checked every 24 hours.**"
+                                    "\n\n**Discord verifications are automatically checked every 48 hours.**"
                                 )
 
                 

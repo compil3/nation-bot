@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from beanie import Document
-from naff import (listen, Extension, logger_name)
+from naff import (listen, Extension, logger_name, ThreadChannel)
 from naff.api.events import MemberRemove, MemberUpdate
 from naff.models.naff.converters import RoleConverter
 
@@ -30,9 +30,14 @@ class AutoRoles(Extension):
     @listen()
     async def on_member_leave(self, event: MemberRemove):
         player_in_queue = VerificationQueue.find(VerificationQueue.discord_id == event.member.id)
+        channel: ThreadChannel =  await self.bot.fetch_channel(player_in_queue.discord_thread)
 
         if player_in_queue is not None:
+            logger.info(f"{event.member.name} has left the server, removing from verification queue.")
             player_in_queue.delete()
+            await channel.delete()
+
+
 
 
 def setup(bot):

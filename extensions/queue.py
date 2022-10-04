@@ -59,6 +59,11 @@ class Queue(Extension):
                 if await fetch_api(self,playerInDb, session):
                     logger.info(f"{playerInDb.discord_name} - {playerInDb.gamertag} found in db.  Auto approving and removing {playerInDb.discord_thread}.")
                     member = await Guild.fetch_member(ctx.guild, playerInDb.discord_id)
+                    if member is None:
+                        logger.info(f"Member {playerInDb.discord_name} found but not in discord.  Deleting from queue.")
+                        await channel.delete("User found in database but not in Discord. Deleting thread.")
+                        await playerInDb.delete()
+                        continue
                     if await RoleConverter().convert(ctx, "Waiting Verification") in member.roles:
                         await member.remove_role(await RoleConverter().convert(ctx, "Waiting Verification"), "Removed from role.")
                     await member.add_role(await RoleConverter().convert(ctx, "Player"), "User has been verified")
@@ -117,8 +122,12 @@ class Queue(Extension):
 
             async with aiohttp.ClientSession() as session:
                 if await fetch_api(self, playerWaiting, session):
-                    print("Player found in API")
                     try:
+                        if member is None:
+                            logger.info(f"Member {playerWaiting.discord_name} found but not in discord.  Deleting from queue.")
+                            await channel.delete("User found in database but not in Discord. Deleting thread.")
+                            await playerWaiting.delete()
+                            continue
                         logger.info(f"A player has been verified:\nDiscord | id: {playerWaiting.discord_name} : {playerWaiting.discord_id}\nGamertag: {playerWaiting.gamertag}")
                         if waiting_role in member.roles and ufc_role in member.roles:
                             await member.remove_roles([waiting_role, ufc_role], "Use removed from roles.")

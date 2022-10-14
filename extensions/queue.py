@@ -1,3 +1,4 @@
+from concurrent.futures import process
 import logging
 import re
 import time
@@ -53,18 +54,23 @@ class Queue(Extension):
         embeds = []
         # Grab the users gamertag from queue, search website for it, if found automatically add 'Player' role.
         startTime = time.time()
+        queue_length = await VerificationQueue.find(VerificationQueue.status == "New").count()
+        processing = 0
         async for playerInDb in VerificationQueue.find(VerificationQueue.status == "New"):
+            processing += 1
+            logger.info(f"Checking {playerInDb.discord_name} for verification. [{processing}/{queue_length}]")
             channel: ThreadChannel =  await self.bot.fetch_channel(playerInDb.discord_thread)
             async with aiohttp.ClientSession() as session:
                 if await fetch_api(self,playerInDb, session):
                     member = await Guild.fetch_member(ctx.guild, playerInDb.discord_id)
                     logger.info(f"{playerInDb.discord_name} - {playerInDb.gamertag} found in db.  Auto approving and removing {playerInDb.discord_thread}.")
 
-                    if "Player" in member.roles:
+                    if await RoleConverter().convert(ctx, "Player") in member.roles:
                         logger.info(f"{member.display_name} already has the 'Player' role.  Deleting thread and removing from DB.")
                         if channel is not None:                                 
                             await channel.delete("User has been verified.")
                         await playerInDb.delete()
+                        continue
 
                     if member is None:
                         logger.info(f"Member {playerInDb.discord_name} found but not in discord.  Deleting from queue.")

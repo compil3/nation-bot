@@ -57,8 +57,15 @@ class Queue(Extension):
             channel: ThreadChannel =  await self.bot.fetch_channel(playerInDb.discord_thread)
             async with aiohttp.ClientSession() as session:
                 if await fetch_api(self,playerInDb, session):
-                    logger.info(f"{playerInDb.discord_name} - {playerInDb.gamertag} found in db.  Auto approving and removing {playerInDb.discord_thread}.")
                     member = await Guild.fetch_member(ctx.guild, playerInDb.discord_id)
+                    logger.info(f"{playerInDb.discord_name} - {playerInDb.gamertag} found in db.  Auto approving and removing {playerInDb.discord_thread}.")
+
+                    if "Player" in member.roles:
+                        logger.info(f"{member.display_name} already has the 'Player' role.  Deleting thread and removing from DB.")
+                        if channel is not None:                                 
+                            await channel.delete("User has been verified.")
+                        await playerInDb.delete()
+
                     if member is None:
                         logger.info(f"Member {playerInDb.discord_name} found but not in discord.  Deleting from queue.")
                         await channel.delete("User found in database but not in Discord. Deleting thread.")
@@ -73,7 +80,7 @@ class Queue(Extension):
                     try:
                         await member.send(f"{member.mention} you have been verified and have been granted access to the PCN Discord.", ephermal=True)
                     except Exception as e:
-                        logger.error(f"Error sending message to user {member.display_name}: {e}") 
+                        logger.error(f"Error sending message to user {member.display_name}: {e}")
                 else:
                     embed = Embed("Verification Queue", description=f"User: `{playerInDb.discord_name}`")
                     embed.add_field("Gamertag", playerInDb.gamertag, inline=False)

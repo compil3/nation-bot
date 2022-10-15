@@ -102,6 +102,16 @@ class Queue(Extension):
         logger.info(f"Queue took {time.time() - startTime} seconds to run.")
         await paginator.send(ctx)
 
+    @waiting_queue.subcommand(
+        "size", 
+        sub_cmd_description="Gets the size of the verification queue."
+    )
+    async def queue_size(self, ctx: InteractionContext) -> None:
+        await ctx.defer(ephemeral=True)
+        queue_length = await VerificationQueue.find(VerificationQueue.status == "New").count()
+        await ctx.send(f"Verification queue size: {queue_length}")
+
+
     async def approval(self, ctx):
         try:
             _discord_id = ctx.message.embeds[0].fields[1].value

@@ -44,7 +44,8 @@ class Queue(Extension):
     # TODO: Add task to check gamer tags in verification_queue every 5 hours, if the gamer tag is found, add 'Player' role to user, remove from queue, send a "register" msg to user.
     @slash_command(
         "queue",
-        description="Discord Verification Queue",
+        sub_cmd_description="Discord Verification Queue",
+        sub_cmd_name="check",
         scopes=[689119429375819951, 442081251441115136],
         default_member_permissions=Permissions.MANAGE_ROLES
     )

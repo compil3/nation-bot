@@ -144,6 +144,11 @@ class Queue(Extension):
             waiting_role: Guild = await guild.fetch_role(1001999651429425233)
             ufc_role: Guild = await guild.fetch_role(1005163999215755347)
 
+            if member is None:
+                logger.info(f"Pre-check: {playerWaiting.discord_name} not found in discord.  Deleting thread and removing from DB.")
+                await channel.delete("User not found in Discord. Deleting thread.")
+                await playerWaiting.delete()
+
             async with aiohttp.ClientSession() as session:
                 if await fetch_api(self, playerWaiting, session):
                     try:

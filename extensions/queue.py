@@ -148,7 +148,7 @@ class Queue(Extension):
                 logger.info(f"Pre-check: {playerWaiting.discord_name} not found in discord.  Deleting thread and removing from DB.")
                 await channel.delete("User not found in Discord. Deleting thread.")
                 await playerWaiting.delete()
-
+                continue
             async with aiohttp.ClientSession() as session:
                 if await fetch_api(self, playerWaiting, session):
                     try:

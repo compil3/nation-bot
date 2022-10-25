@@ -65,7 +65,11 @@ class Queue(Extension):
                 if await fetch_api(self,playerInDb, session):
                     member = await Guild.fetch_member(ctx.guild, playerInDb.discord_id)
                     logger.info(f"{playerInDb.discord_name} - {playerInDb.gamertag} found in db.  Auto approving and removing {playerInDb.discord_thread}.")
-
+                    if member is None:
+                        logger.error(f"Unable to find member {playerInDb.discord_name} in guild.")
+                        await channel.delete("Unable to find member in guild.")
+                        await playerInDb.delete()
+                        continue
                     if await RoleConverter().convert(ctx, "Player") in member.roles:
                         logger.info(f"{member.display_name} already has the 'Player' role.  Deleting thread and removing from DB.")
                         if channel is not None:                                 

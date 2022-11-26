@@ -142,9 +142,9 @@ class Tags(Extension):
                 ),
                 ParagraphText(
                     label="Tag Contents",
-                    placeholder="Eg: https://proclubsnation.com/table/Super-league/",
+                    placeholder="Maxiumum of 4000 characters.",
                     custom_id="contents",
-                    max_length=1024,
+                    max_length=4000,
                 ),
             ],
             custom_id="create_tag",

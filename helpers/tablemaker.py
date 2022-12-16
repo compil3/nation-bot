@@ -28,8 +28,12 @@ def make_table(rows: list[list[Any]], labels: Optional[list[Any]] = None, center
     if labels is not None:
         lines.append(_make_data_line(column_widths, labels, data_left, data_middle, data_right, align))
         lines.append(_make_solid_line(column_widths, "├", "┼", "┤"))
-    for row in rows:
-        lines.append(_make_data_line(column_widths, row, data_left, data_middle, data_right, align))
+    lines.extend(
+        _make_data_line(
+            column_widths, row, data_left, data_middle, data_right, align
+        )
+        for row in rows
+    )
     lines.append(_make_solid_line(column_widths, "╰", "┴", "╯"))
     return "\n".join(lines)
 

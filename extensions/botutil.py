@@ -44,9 +44,7 @@ def strf_delta(time_delta: datetime.timedelta, show_seconds=True) -> str:
         return f"{days_fmt} and {hours_fmt}"
     if hours >= 1:
         return f"{hours_fmt} and {minutes_fmt}"
-    if show_seconds:
-        return f"{minutes_fmt} and {seconds_fmt}"
-    return f"{minutes_fmt}"
+    return f"{minutes_fmt} and {seconds_fmt}" if show_seconds else f"{minutes_fmt}"
 
 
 def get_size(bytes, suffix="B"):
@@ -89,9 +87,9 @@ class BotInfo (Extension):
         )
         return e
 
-    async def get_async(url):
+    async def get_async(self):
         async with httpx.AsyncClient(timeout=None) as client:
-            return await client.get(url)
+            return await client.get(self)
 
     def get_repo_hash(self) -> str:
         repo = git.Repo(".")
@@ -142,14 +140,13 @@ class BotInfo (Extension):
         e.add_field("Operating System", platform.system(), inline=True)
         e.add_field(name="CPU | Usage", value=f"**{psutil.cpu_count(logical=False)} | {psutil.cpu_percent()}%**", inline=True)
         e.add_field(name="RAM Usage", value=f"**{psutil.virtual_memory().percent}**%", inline=True)
-        
+
         e.add_field("Loaded Extensions", ", ".join(self.bot.ext))
-        guild_names = []
-        for guild in self.bot.guilds:
-            guild_names.append(guild.name)
+        guild_names = [guild.name for guild in self.bot.guilds]
         e.add_field(f"Connected to **{len(self.bot.guilds)}** Guilds", guild_names)
-        privileged_intents = [i.name for i in self.bot.intents if i in Intents.PRIVILEGED]
-        if privileged_intents:
+        if privileged_intents := [
+            i.name for i in self.bot.intents if i in Intents.PRIVILEGED
+        ]:
             e.add_field("Intents", " | ".join(privileged_intents), inline=True)
 
         e.add_field(name="\u200b", value="**API Status**", inline=False)
@@ -208,10 +205,8 @@ class BotInfo (Extension):
     )
     async def _guild_names(self, ctx:InteractionContext) -> None:
         await ctx.defer(ephemeral=True)
-        guild_list = []
+        guild_list = [f"[ {guild.name} ]" for guild in self.bot.guilds]
 
-        for guild in self.bot.guilds:
-            guild_list.append(f"[ {guild.name} ]")
         embed = Embed(
             title="Guilds",
             description="\n".join(guild_list),

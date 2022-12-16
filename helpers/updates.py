@@ -75,9 +75,10 @@ def get_git_changes(repo: git.Repo) -> dict:
         if commit.hexsha == current_hash:
             break
         files = commit.stats.files
-        file_changes.update(
-            {key: {"insertions": 0, "deletions": 0, "lines": 0} for key in files.keys()}
-        )
+        file_changes |= {
+            key: {"insertions": 0, "deletions": 0, "lines": 0}
+            for key in files.keys()
+        }
         for file, stats in files.items():
             if file not in file_changes:
                 file_changes[file] = {"insertions": 0, "deletions": 0, "lines": 0}

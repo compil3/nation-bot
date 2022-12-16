@@ -89,49 +89,49 @@ class DiscordVerification(Extension):
                         gt_lookup = await resp.text()
                         search_response = orjson.loads(gt_lookup)
                         if len(search_response) < 1:
-                                await ctx.author.add_role(await RoleConverter().convert(ctx, "Waiting Verification"), "Waiting for verification.")
-                                await ctx.author.remove_role(await RoleConverter().convert(ctx, "New Member"), "Verification started")
+                            await ctx.author.add_role(await RoleConverter().convert(ctx, "Waiting Verification"), "Waiting for verification.")
+                            await ctx.author.remove_role(await RoleConverter().convert(ctx, "New Member"), "Verification started")
 
-                                thread = await channel.create_private_thread(
-                                    name=f"{ctx.author.display_name}'s Verification",
-                                    auto_archive_duration=AutoArchiveDuration.ONE_WEEK,
-                                    reason="Verification Thread",
-                                    invitable=False,
+                            thread = await channel.create_private_thread(
+                                name=f"{ctx.author.display_name}'s Verification",
+                                auto_archive_duration=AutoArchiveDuration.ONE_WEEK,
+                                reason="Verification Thread",
+                                invitable=False,
+                            )
+                            await thread.add_member(ctx.author.id)
+
+                            if not previous_tag:
+                                previous_tag = "--"
+
+                            await thread.send(
+                                f"Welcome to your verification thread, {ctx.author.mention}."
+                                "\nThis thread was created automatically by the bot due to your Gamer Tag not being found.\n\n"
+                                "**Provided Information:**\n\n"
+                                f"Gamertag: **{current_tag}**\n"
+                                f"Previous Gamertags: **{previous_tag}**\n"
+                                "Verified Onsite: **False**"         
+                                "\n\n**Please make sure you have Direct Messages enabled for this server."
+                                "\nYou will be notified via DM when access is granted.**"
+                                "\nTo enble DMs for this server only on mobile, click server name > Allow Direct Messages."
+                                "\nTo enable DMs for this server only on desktop, click server name > Privacy Settings > Allow Direct Messages."
+                                "\n\n**Discord verifications are automatically checked every 48 hours.**"
+                            )
+
+
+                            await ctx.send(f"{ctx.author.mention} Your verification thread has been created here: {thread.mention}", ephemeral=True)
+
+                            existing_verification = await VerificationQueue.find_one({"discord_id": ctx.author.id})
+                            if existing_verification is None:    
+                                waiting_verification = VerificationQueue(
+                                    discord_id=ctx.author.id,
+                                    discord_name=ctx.author.display_name,
+                                    gamertag=current_tag,
+                                    status="New",
+                                    reason="Waiting for website verification",
+                                    updated=datetime.now(),
+                                    discord_thread=thread.id,
                                 )
-                                await thread.add_member(ctx.author.id)
-
-                                if not previous_tag:
-                                    previous_tag = "--"
-
-                                await thread.send(
-                                    f"Welcome to your verification thread, {ctx.author.mention}."
-                                    "\nThis thread was created automatically by the bot due to your Gamer Tag not being found.\n\n"
-                                    "**Provided Information:**\n\n"
-                                    f"Gamertag: **{current_tag}**\n"
-                                    f"Previous Gamertags: **{previous_tag}**\n"
-                                    "Verified Onsite: **False**"         
-                                    "\n\n**Please make sure you have Direct Messages enabled for this server."
-                                    "\nYou will be notified via DM when access is granted.**"
-                                    "\nTo enble DMs for this server only on mobile, click server name > Allow Direct Messages."
-                                    "\nTo enable DMs for this server only on desktop, click server name > Privacy Settings > Allow Direct Messages."
-                                    "\n\n**Discord verifications are automatically checked every 48 hours.**"
-                                )
-
-                
-                                await ctx.send(f"{ctx.author.mention} Your verification thread has been created here: {thread.mention}", ephemeral=True)
-
-                                existing_verification = await VerificationQueue.find_one({"discord_id": ctx.author.id})
-                                if existing_verification is None:    
-                                    waiting_verification = VerificationQueue(
-                                        discord_id=ctx.author.id,
-                                        discord_name=ctx.author.display_name,
-                                        gamertag=current_tag,
-                                        status="New",
-                                        reason="Waiting for website verification",
-                                        updated=datetime.now(),
-                                        discord_thread=thread.id,
-                                    )
-                                    await waiting_verification.save()
+                                await waiting_verification.save()
                         else:
                             for db_player in search_response:
                                 if re.match(current_tag, db_player['title']['rendered'], flags=re.I):
@@ -140,7 +140,7 @@ class DiscordVerification(Extension):
                                             lookup = await gamertag_lookup.text()
                                             player_found = orjson.loads(lookup)
 
-                                            if len(player_found) < 1:                                            
+                                            if len(player_found) < 1:    
                                                 await ctx.author.add_role(await RoleConverter().convert(ctx, "Waiting Verification"), "Waiting for verification.")
                                                 await ctx.author.remove_role(await RoleConverter().convert(ctx, "New Member"), "Verification started")
                                                 thread = await channel.create_public_thread(
@@ -168,7 +168,7 @@ class DiscordVerification(Extension):
                                                     "\n\n**Discord verifications are automatically checked every 24 hours.**"
                                                 )
 
-                                
+
                                                 await ctx.send(f"{ctx.author.mention} Your verification thread has been created here: {thread.mention}", ephemeral=True)
 
                                                 existing_verification = await VerificationQueue.find_one({"discord_id": ctx.author.id})
@@ -183,8 +183,6 @@ class DiscordVerification(Extension):
                                                         discord_thread=thread.id,
                                                     )
                                                     await waiting_verification.save()
-                                                else:
-                                                    pass
                                             else:
                                                 try:
                                                     await ctx.author.add_role(await RoleConverter().convert(ctx, "Player"), "Granted Access")

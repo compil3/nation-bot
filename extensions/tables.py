@@ -62,11 +62,11 @@ class Tables(Extension):
         await ctx.send("PCN Standings", components=components)
 
     def get_league_tables(self,session):
-        tasks = []
         competitions = ["super-league", "league-one", "league-two"]
-        for league in competitions:
-            tasks.append(session.get(self.bot.config.urls.tables.format(league), ssl=False))
-        return tasks
+        return [
+            session.get(self.bot.config.urls.tables.format(league), ssl=False)
+            for league in competitions
+        ]
         
 
     @component_callback("all_leagues")
@@ -121,14 +121,15 @@ class Tables(Extension):
                             team = str(standing_data[0]['data'][tablePosition]['name'])
                         pts = str(standing_data[0]['data'][tablePosition]['pts'])
                         table.add_row(rank, team, pts)
-                    else:
-                        pass
                 console = Console()
                 with console.capture() as cap:
                     console.print(table)
                 # table_out = cap.get()
                 e.description = f"```ansi\n{cap.get()}\n```"
-                e.set_footer(text=f"proclubsnation.com", icon_url="https://proclubsnation.com/wp-content/uploads/2021/10/PCN_logo_new.png")
+                e.set_footer(
+                    text="proclubsnation.com",
+                    icon_url="https://proclubsnation.com/wp-content/uploads/2021/10/PCN_logo_new.png",
+                )
         return e  
 
     @logger.catch
@@ -143,7 +144,7 @@ class Tables(Extension):
             for league in competition:
                 url = self.bot.config.urls.tables.format(league)
                 tasks.append(asyncio.ensure_future(get_data(client, url)))
-            
+
             tables = await asyncio.gather(*tasks)
             for standings in tables:
                 league_name, season = standings[0]['title']['rendered'].split("&#8211;")
@@ -164,15 +165,16 @@ class Tables(Extension):
                         pts = str(standings[0]['data'][table_position]['pts'])
                         table.add_row(rank, team, pts)
                         league_table.append(table)
-                    else:
-                        pass
                 console = Console()
                 with console.capture() as cap:
                     console.print(table)
                 e.description = f"```ansi\n{cap.get()}\n```"
-                e.set_footer(text=f"proclubsnation.com", icon_url="https://proclubsnation.com/wp-content/uploads/2021/10/PCN_logo_new.png")
+                e.set_footer(
+                    text="proclubsnation.com",
+                    icon_url="https://proclubsnation.com/wp-content/uploads/2021/10/PCN_logo_new.png",
+                )
                 embeds.append(e)
-                
+
         return embeds                
         
 
